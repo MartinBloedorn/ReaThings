@@ -1,0 +1,65 @@
+desc:3-Band 2nd order Butterworth Splitter
+
+//slider1:gain_db=0.5<0,10,0.01>gain (dB)
+slider1:ctrl_type=0<0,1,1{Stereo,Mono}>Processing
+slider2:freq_lo_hz=100<10,24000,1>freq lo (Hz)
+slider3:freq_hi_hz=1000<10,24000,1>freq hi (Hz)
+
+in_pin:left input
+in_pin:right input
+out_pin:low output left
+out_pin:low output right
+out_pin:mid output left
+out_pin:mid output right
+out_pin:high output left
+out_pin:high output right
+
+@init
+ctrl_type = 1;
+
+function iir_lp_init(f) (
+  k  = 2.0*srate;
+  wc = 2.0*$pi*f;
+  ksi= sqrt(2.0);
+  
+  this.b0 = wc*wc;
+  this.b1 = 2*wc*wc;
+  this.b2 = wc*wc;
+  this.a0 = k*k + ksi*wc*k + wc*wc;
+  this.a1 = 2*wc*wc - 2*k*k;
+  this.a2 = k*k - ksi*wc*k + wc*wc;
+);
+
+function iir_lp_in(v) (
+  this.y2 = this.y1;
+  this.y1 = this.y0;
+  this.u2 = this.u1;
+  this.u1 = this.u0;
+  this.u0 = v;
+  this.y0 = (this.b2*this.u2 + this.b1*this.u1 + this.b0*v - this.a2*this.y2 - this.a1*this.y1)/this.a0;
+);
+
+@slider
+flp_lo_r.iir_lp_init(freq_lo_hz);
+flp_lo_l.iir_lp_init(freq_lo_hz);
+flp_hi_r.iir_lp_init(freq_hi_hz);
+flp_hi_l.iir_lp_init(freq_hi_hz);
+
+@sample
+s0 = spl0;
+s1 = spl1;
+
+spl2 = flp_hi_l.iir_lp_in(s0);
+spl3 = flp_hi_r.iir_lp_in(s1);
+
+spl0 = flp_lo_l.iir_lp_in(s0);
+spl1 = flp_lo_r.iir_lp_in(s1);
+
+spl2 = spl2 - spl0;
+spl3 = spl3 - spl1;
+
+spl4 = s0 - spl0 - spl2;
+spl5 = s1 - spl1 - spl3;
+
+
+

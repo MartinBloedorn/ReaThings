@@ -1,0 +1,39 @@
+desc:Signal Math
+
+slider1:op=0<0,1,1{Add, Subtract, Multiply, Divide}>Operation
+slider2:gain=1.0<0,2,0.01>Gain (abs)
+
+in_pin:left A
+in_pin:right A
+in_pin:left B
+in_pin:right B
+out_pin:left (A op B)
+out_pin:right (A op B)
+
+@init
+type=1;
+gain=1.0;
+
+@slider
+
+@sample
+
+op == 0 ? (
+spl0 = spl0 + spl2;
+spl1 = spl1 + spl3;
+);
+op == 1 ? (
+spl0 = spl0 - spl2;
+spl1 = spl1 - spl3;
+);
+op == 2 ? (
+spl0 = spl0 * spl2;
+spl1 = spl1 * spl3;
+);
+op == 3 ? (
+spl0 = spl0 / spl2;
+spl1 = spl1 / spl3;
+);
+
+spl0 = gain*spl0;
+spl1 = gain*spl1;
