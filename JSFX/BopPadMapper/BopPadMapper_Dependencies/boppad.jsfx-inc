@@ -1,4 +1,4 @@
-import memory_lib
+import memory.jsfx-inc
 
 @init
 

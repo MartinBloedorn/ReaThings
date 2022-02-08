@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<index version="1" name="Martins ReaThings" commit="">
+  <category name="BopPad">
+    <reapack name="BopPadMapper.jsfx" type="effect" desc="BopPad Mapper">
+      <!--BopPadMapper_NEWVERSION-->
+    </reapack>
+  </category>
+</index>

@@ -1,6 +1,9 @@
-desc:BopPad Mapper Type B
+desc:BopPad Mapper
+author: Martin Bloedorn
+license: MIT
+provides: BopPadMapper_Dependencies/*
 
-import boppad_lib
+import boppad.jsfx-inc
 
 slider1:sli_qa_en_pitchbend=1<0,1,1{Disabled,Enabled}>Pressure Pitch Bend (A)
 slider2:sli_qa_mode=3<0,1,1{Off,CC only,Notes AND CC,Notes XOR CC}>Mode (A)
