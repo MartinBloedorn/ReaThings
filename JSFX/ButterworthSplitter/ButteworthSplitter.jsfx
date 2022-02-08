@@ -1,9 +1,7 @@
 desc:3-Band 2nd order Butterworth Splitter
 
-//slider1:gain_db=0.5<0,10,0.01>gain (dB)
-slider1:ctrl_type=0<0,1,1{Stereo,Mono}>Processing
-slider2:freq_lo_hz=100<10,24000,1>freq lo (Hz)
-slider3:freq_hi_hz=1000<10,24000,1>freq hi (Hz)
+slider1:freq_lo_hz=100<10,24000,1>freq lo (Hz)
+slider2:freq_hi_hz=1000<10,24000,1>freq hi (Hz)
 
 in_pin:left input
 in_pin:right input
@@ -17,7 +15,8 @@ out_pin:high output right
 @init
 ctrl_type = 1;
 
-function iir_lp_init(f) (
+/* Initializes an IIR filter instance, that can work as LP or HP. */
+function iir_init(f) (
   k  = 2.0*srate;
   wc = 2.0*$pi*f;
   ksi= sqrt(2.0);
@@ -28,8 +27,12 @@ function iir_lp_init(f) (
   this.a0 = k*k + ksi*wc*k + wc*wc;
   this.a1 = 2*wc*wc - 2*k*k;
   this.a2 = k*k - ksi*wc*k + wc*wc;
+  this.c2 = k^2;
+  this.c1 = -2*k^2;
+  this.c0 = k^2;
 );
 
+/* Processes sample v into filter in LP mode */
 function iir_lp_in(v) (
   this.y2 = this.y1;
   this.y1 = this.y0;
@@ -39,27 +42,35 @@ function iir_lp_in(v) (
   this.y0 = (this.b2*this.u2 + this.b1*this.u1 + this.b0*v - this.a2*this.y2 - this.a1*this.y1)/this.a0;
 );
 
+/* Processes sample v into filter in HP mode */
+function iir_hp_in(v) (
+  this.y2 = this.y1;
+  this.y1 = this.y0;
+  this.u2 = this.u1;
+  this.u1 = this.u0;
+  this.u0 = v;
+  this.y0 = (this.c2*this.u2 + this.c1*this.u1 + this.c0*v - this.a2*this.y2 - this.a1*this.y1)/this.a0;
+);
+
 @slider
-flp_lo_r.iir_lp_init(freq_lo_hz);
-flp_lo_l.iir_lp_init(freq_lo_hz);
-flp_hi_r.iir_lp_init(freq_hi_hz);
-flp_hi_l.iir_lp_init(freq_hi_hz);
+flt_lo_r.iir_init(freq_lo_hz);
+flt_lo_l.iir_init(freq_lo_hz);
+
+flt_mil_r.iir_init(freq_lo_hz);
+flt_mil_l.iir_init(freq_lo_hz);
+flt_mih_r.iir_init(freq_hi_hz);
+flt_mih_l.iir_init(freq_hi_hz);
+
+flt_hi_r.iir_init(freq_hi_hz);
+flt_hi_l.iir_init(freq_hi_hz);
 
 @sample
-s0 = spl0;
-s1 = spl1;
+_s0 = spl0;
+_s1 = spl1;
 
-spl2 = flp_hi_l.iir_lp_in(s0);
-spl3 = flp_hi_r.iir_lp_in(s1);
-
-spl0 = flp_lo_l.iir_lp_in(s0);
-spl1 = flp_lo_r.iir_lp_in(s1);
-
-spl2 = spl2 - spl0;
-spl3 = spl3 - spl1;
-
-spl4 = s0 - spl0 - spl2;
-spl5 = s1 - spl1 - spl3;
-
-
-
+spl0 = flt_lo_l.iir_lp_in(_s0);
+spl1 = flt_lo_r.iir_lp_in(_s1);
+spl4 = flt_hi_l.iir_hp_in(_s0);
+spl5 = flt_hi_r.iir_hp_in(_s1);
+spl2 = _s0 - spl0 - spl4;
+spl3 = _s0 - spl1 - spl5;
