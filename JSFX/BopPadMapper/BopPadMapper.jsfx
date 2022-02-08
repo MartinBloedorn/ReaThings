@@ -1,0 +1,114 @@
+desc:BopPad Mapper Type B
+
+import boppad_lib
+
+slider1:sli_qa_en_pitchbend=1<0,1,1{Disabled,Enabled}>Pressure Pitch Bend (A)
+slider2:sli_qa_mode=3<0,1,1{Off,CC only,Notes AND CC,Notes XOR CC}>Mode (A)
+slider3:sli_qa_pressure_cc=0<0, 127, 1>Pressure CC (A)
+slider4:sli_qa_radius_cc=0<0, 127, 1>Radius CC (A)
+slider5:sli_qa_cc_channel=1<1,16, 1>CC Channel (A)
+slider6:sli_qa_note_channel=1<1,16, 1>Note Channel (A)
+slider7:sli_qa_note0=0<0,127>Note 0 (A)
+slider8:sli_qa_note1=0<0,127>Note 1 (A)
+slider9:sli_qa_note2=0<0,127>Note 2 (A)
+
+slider15:sli_qd_en_pitchbend=0<0,1,1{Disabled,Enabled}>Pressure Pitch Bend (D)
+slider16:sli_qd_mode=3<0,1,1{Off,CC only,Notes AND CC,Notes XOR CC}>Mode (D)
+slider17:sli_qd_pressure_cc=0<0, 127, 1>Pressure CC (D)
+slider18:sli_qd_radius_cc=0<0, 127, 1>Radius CC (D)
+slider19:sli_qd_cc_channel=4<1,16, 1>CC Channel (D)
+slider20:sli_qd_note_channel=4<1,16, 1>Note Channel (D)
+slider21:sli_qd_note0=0<0,127>Note 0 (D)
+slider22:sli_qd_note1=0<0,127>Note 1 (D)
+slider23:sli_qd_note2=0<0,127>Note 2 (D)
+
+slider30:sli_qb_note0=48<0,127>Note 0 (B)
+slider31:sli_qb_note1=48<0,127>Note 1 (B)
+slider32:sli_qb_note2=53<0,127>Note 2 (B)
+slider33:sli_qb_note3=53<0,127>Note 3 (B)
+slider34:sli_qb_note4=57<0,127>Note 4 (B)
+slider35:sli_qb_note5=0<0,127>Note 5 (B)
+slider36:sli_qb_note6=0<0,127>Note 6 (B)
+
+slider45:sli_qc_note0=50<0,127>Note 0 (C)
+slider46:sli_qc_note1=50<0,127>Note 1 (C)
+slider47:sli_qc_note2=55<0,127>Note 2 (C)
+slider48:sli_qc_note3=55<0,127>Note 3 (C)
+slider49:sli_qc_note4=59<0,127>Note 4 (C)
+slider50:sli_qc_note5=0<0,127>Note 5 (C)
+slider51:sli_qc_note6=0<0,127>Note 6 (C)
+
+slider60:sli_sensitivity=1.15<0.1, 2.0, 0.001>Sensitivity
+
+in_pin:left input
+in_pin:right input
+out_pin:left output 
+out_pin:right output
+
+@init
+
+// * * * * * * * constants
+
+c_mode_off = 0;
+c_mode_cconly = 1;
+c_mode_notesandcc = 2;
+c_mode_notesxorcc = 3;
+
+// * * * * * * * setup()
+
+qa.bpq_init(0);
+qb.bpq_init(1);
+qc.bpq_init(2);
+qd.bpq_init(3);
+
+@slider
+
+// - - - notes
+
+qa.bpq_set_notes_l(3, sli_qa_note0, sli_qa_note1, 
+                      sli_qa_note2, 0, 0, 0, 0);
+qd.bpq_set_notes_l(3, sli_qd_note0, sli_qd_note1, 
+                      sli_qd_note2, 0, 0, 0, 0);
+qb.bpq_set_notes_l(0, sli_qb_note0, sli_qb_note1, 
+                      sli_qb_note2, sli_qb_note3, 
+                      sli_qb_note4, sli_qb_note5, 
+                      sli_qb_note6);
+qc.bpq_set_notes_l(0, sli_qc_note0, sli_qc_note1, 
+                      sli_qc_note2, sli_qc_note3, 
+                      sli_qc_note4, sli_qc_note5, 
+                      sli_qc_note6);
+
+// - - - other settings
+
+qa.cfg_en_note = sli_qa_mode >= c_mode_notesandcc;
+qa.cfg_no_cc_on_note = sli_qa_mode == c_mode_notesxorcc;
+qa.cfg_en_pitchbend = sli_qa_en_pitchbend;
+qa.cfg_out_cc_radius = sli_qa_mode >= c_mode_cconly ? sli_qa_radius_cc : 0;
+qa.cfg_out_cc_pressure = sli_qa_mode >= c_mode_cconly ? sli_qa_pressure_cc : 0;
+qa.cfg_out_cc_channel = sli_qa_cc_channel - 1;
+qa.cfg_out_note_channel = sli_qa_note_channel - 1;
+
+qd.cfg_en_note = sli_qd_mode >= c_mode_notesandcc;
+qd.cfg_no_cc_on_note = sli_qd_mode == c_mode_notesxorcc;
+qd.cfg_en_pitchbend = sli_qd_en_pitchbend;
+qd.cfg_out_cc_radius = sli_qd_mode >= c_mode_cconly ? sli_qd_radius_cc : 0;
+qd.cfg_out_cc_pressure = sli_qd_mode >= c_mode_cconly ? sli_qd_pressure_cc : 0;
+qd.cfg_out_cc_channel = sli_qd_cc_channel - 1;
+qd.cfg_out_note_channel = sli_qd_note_channel - 1;
+
+qa.cfg_gain_vel = sli_sensitivity;
+qb.cfg_gain_vel = sli_sensitivity;
+qc.cfg_gain_vel = sli_sensitivity;
+qd.cfg_gain_vel = sli_sensitivity;
+
+@block
+
+// * * * * * * * loop()
+
+while (midirecv(offset, msg1, msg2, msg3)) 
+( 
+  qa.bpq_update(offset, msg1, msg2, msg3);
+  qb.bpq_update(offset, msg1, msg2, msg3);
+  qc.bpq_update(offset, msg1, msg2, msg3);
+  qd.bpq_update(offset, msg1, msg2, msg3);
+);

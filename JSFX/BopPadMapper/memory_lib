@@ -1,0 +1,18 @@
+@init
+
+// references:
+// https://forums.cockos.com/showthread.php?t=236817
+// https://forum.cockos.com/showthread.php?t=6027
+// https://www.reaper.fm/sdk/js/basiccode.php (gmem)
+
+function mem_init() instance(index) ( 
+  index = 0;
+);
+
+function mem_alloc(amount) instance(index) local(i) ( 
+  i = index;
+  index += amount;
+  i;
+);
+
+MEMORY.mem_init();	// creating 'static' instance MEMORY

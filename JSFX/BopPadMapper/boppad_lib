@@ -1,0 +1,179 @@
+import memory_lib
+
+@init
+
+// * * * * * * * constants
+
+c_midi_notedown = 0x90;
+c_midi_noteup = 0x80;
+c_midi_cc = 0xB0;
+c_midi_pitchbend = 0xE0;
+
+c_cc_initradius = 0x10;
+c_cc_radius = 0x11;
+c_cc_pressure = 0x12;
+
+// * * * * * * * static functions
+
+function s_midi_val(val) 
+(
+  min(127, max(0, floor(val)));
+);
+
+// \class BopPad Quadrant
+// * * * * * * * class bpq - private
+
+function _bpq_send_pitchbend(offset, value_b) local(msb)
+(
+  (this.cfg_en_pitchbend) ? (
+    msb = this.cfg_gain_pitchbend*(value_b/2) + 0x40;
+    midisend(offset,
+             c_midi_pitchbend | this.cfg_out_cc_channel,
+             0, // lsb
+             s_midi_val(msb));
+  );
+);
+
+function _bpq_send_cc(offset, cc, val) 
+(
+  (cc) ? (
+    midisend(offset,
+             c_midi_cc | this.cfg_out_cc_channel,
+             cc,
+             s_midi_val(val));
+  );
+);
+
+function _bpq_send_notedown(offset)
+(
+  (this.cfg_en_note && this._note) ? (
+    midisend(offset, 
+             c_midi_notedown | this.cfg_out_note_channel, 
+             this._note, 
+             s_midi_val(this.cfg_gain_vel*this._vel));
+  );
+);
+
+function _bpq_send_noteup(offset)
+(
+  (this.cfg_en_note && this._note) ? (
+    midisend(offset, 
+             c_midi_noteup | this.cfg_out_note_channel, 
+             this._note, 
+             0);
+  );
+);
+
+function _bpq_map_note(value_cc) local(i)
+(
+  i = min(this._notes_n - 1, floor(value_cc/this._notes_step));
+  (i >= 0) ? this._notes[i] : 0;
+);
+
+// * * * * * * * class bpq - public
+
+function bpq_init(quadrant_channel) 
+(
+  this.c_max_notes_n = 8;         // class const.: max number of notes
+
+  this._channel_in = quadrant_channel;
+  this._note = 0;
+  this._vel = 0;
+
+  this._notes = MEMORY.mem_alloc(this.c_max_notes_n);
+  this._notes_n = 0;
+  this._notes_step = 1;
+  
+  this.cfg_gain_vel = 1.25;
+  this.cfg_gain_pitchbend = 1.15;
+
+  this.cfg_en_note = 1;           // note output on quadrant
+  this.cfg_en_pitchbend = 0;      // pitchbend on quadrant [0, 1]
+  this.cfg_no_cc_on_note = 1;     // don't emit CC if a note is on
+  this.cfg_out_cc_radius = 0;     // CC output for radius [ = cc]
+  this.cfg_out_cc_pressure = 0;   // CC output for pressure [ = cc]
+  this.cfg_out_note_channel = quadrant_channel;
+  this.cfg_out_cc_channel = quadrant_channel;
+);
+
+function bpq_set_notes(n, notes) local(i)
+(
+  i = 0;
+  this._notes_n = max(0, min(n, this.c_max_notes_n));
+  this._notes_step = (this._notes_n > 0) ? floor(127/n) : 1;
+  while(i < this._notes_n) (this._notes[i] = notes[i]; i = i+1);
+);
+
+function bpq_set_notes_l(count, n0, n1, n2, n3, n4, n5, n6) local(count, notes)
+(
+  notes[0] = n0;
+  notes[1] = n1;
+  notes[2] = n2;
+  notes[3] = n3;
+  notes[4] = n4;
+  notes[5] = n5;
+  notes[6] = n6;
+
+  (count == 0) ? (
+    loop(7, count = count + (notes[count] != 0));
+  );
+  
+  this.bpq_set_notes(count, notes);
+);
+
+function bpq_update(offset, midi_b0, midi_b1, midi_b2) local(channel, status, cc, val)
+(
+  channel = midi_b0 & 0x0F;
+  status = midi_b0 & 0xF0;
+  
+  // switch(status)
+  (channel != this._channel_in) ? (
+    // return
+    0
+  )
+  
+  : (status == c_midi_notedown) ? (
+    this._vel = midi_b2;
+  ) 
+  
+  : (status == c_midi_noteup) ? (
+    this._bpq_send_noteup(offset);
+    // reset pressure signals if applicable
+    (this._note == 0 || this.cfg_no_cc_on_note == 0) ? (
+      this._bpq_send_pitchbend(offset, 0);
+      this._bpq_send_cc(offset, this.cfg_out_cc_pressure, 0);
+    );
+    this._note = 0;
+  )
+  
+  : (status == c_midi_cc) ? (
+    // ignore cc's if note is on, and exclusion is configured
+    cc = this.cfg_no_cc_on_note && this._note ? 0 : midi_b1;
+    val = midi_b2;
+    
+    // switch(cc)
+    (cc == c_cc_initradius) ? (
+      (this._vel && this._note == 0) ? (
+        this._note = this._bpq_map_note(val);
+        this._bpq_send_notedown(offset);
+        this._vel = 0;
+      );
+    ) 
+    : (cc == c_cc_pressure) ? (
+      this._bpq_send_pitchbend(offset, val);
+      this._bpq_send_cc(offset, this.cfg_out_cc_pressure, val);
+    )
+    : (cc == c_cc_radius) ? (
+      this._bpq_send_cc(offset, this.cfg_out_cc_radius, val);
+    );
+  );
+);
+
+// * * * * * * * class bpq - end
+
+// * * * * * * * setup()
+
+qa.bpq_init(0);
+qb.bpq_init(1);
+qc.bpq_init(2);
+qd.bpq_init(3);
