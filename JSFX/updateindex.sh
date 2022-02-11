@@ -8,7 +8,7 @@ fi
 VERSION=$1
 INFO=$2
 COMMIT=`git log --format="%H" -n 1`
-DATE=`date -u +%Y-%M-%dT%H:%m:%SZ`
+DATE=`date -u +%Y-%m-%dT%H:%M:%SZ`
 NEWVERSIONPLACEHOLDER="<!--BopPadMapper_NEWVERSION-->"
 
 # printf ain't an option, as sed gets confused with line endings

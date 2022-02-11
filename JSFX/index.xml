@@ -2,11 +2,11 @@
 <index version="1" name="Martins ReaThings" commit="">
   <category name="BopPad">
     <reapack name="BopPadMapper.jsfx" type="effect" desc="Martins BopPad Mapper">
-      <version name="0.1" author="Martin Bloedorn" time="2022-03-11T08:02:43Z">
+      <version name="0.1" author="Martin Bloedorn" time="2022-02-11T08:13:48Z">
         <changelog><![CDATA[Initial release.]]></changelog>
-        <source>https://github.com/MartinBloedorn/ReaThings/raw/8ff2efe668f3815fe4b70f099f6c811ea27cd7cb/JSFX/BopPadMapper/BopPadMapper.jsfx</source>
-        <source file="BopPadMapper_Dependencies/boppad.jsfx-inc">https://github.com/MartinBloedorn/ReaThings/raw/8ff2efe668f3815fe4b70f099f6c811ea27cd7cb/JSFX/BopPadMapper/BopPadMapper_Dependencies/boppad.jsfx-inc</source>
-        <source file="BopPadMapper_Dependencies/memory.jsfx-inc">https://github.com/MartinBloedorn/ReaThings/raw/8ff2efe668f3815fe4b70f099f6c811ea27cd7cb/JSFX/BopPadMapper/BopPadMapper_Dependencies/memory.jsfx-inc</source>
+        <source>https://github.com/MartinBloedorn/ReaThings/raw/fd030ea794c2da9f493b199bfa071d28f249d799/JSFX/BopPadMapper/BopPadMapper.jsfx</source>
+        <source file="BopPadMapper_Dependencies/boppad.jsfx-inc">https://github.com/MartinBloedorn/ReaThings/raw/fd030ea794c2da9f493b199bfa071d28f249d799/JSFX/BopPadMapper/BopPadMapper_Dependencies/boppad.jsfx-inc</source>
+        <source file="BopPadMapper_Dependencies/memory.jsfx-inc">https://github.com/MartinBloedorn/ReaThings/raw/fd030ea794c2da9f493b199bfa071d28f249d799/JSFX/BopPadMapper/BopPadMapper_Dependencies/memory.jsfx-inc</source>
       </version>
       <!--BopPadMapper_NEWVERSION-->
     </reapack>
