@@ -1,4 +1,4 @@
-desc:BopPad Mapper
+desc:Martins BopPad Mapper
 author: Martin Bloedorn
 license: MIT
 provides: BopPadMapper_Dependencies/*

@@ -8,18 +8,10 @@ fi
 VERSION=$1
 INFO=$2
 COMMIT=`git log --format="%H" -n 1`
-DATE=`date -u +%Y-%M-%dT%H-%m-%SZ`
+DATE=`date -u +%Y-%M-%dT%H:%m:%SZ`
 NEWVERSIONPLACEHOLDER="<!--BopPadMapper_NEWVERSION-->"
 
-# NEWVERSION=`printf \
-# "<version name=\"${VERSION}\" author=\"Martin Bloedorn\" time=\"${DATE}\">
-#   <changelog><![CDATA[${INFO}]]></changelog>
-#   <source>https://github.com/MartinBloedorn/ReaThings/raw/${COMMIT}/BopPadMapper/BopPadMapper.jsfx</source>
-#   <source file=\"BopPadMapper_Dependencies/boppad.jsfx-inc\">https://github.com/MartinBloedorn/ReaThings/raw/${COMMIT}/BopPadMapper/BopPadMapper_Dependencies/boppad.jsfx-inc</source>
-#   <source file=\"BopPadMapper_Dependencies/memory.jsfx-inc\">https://github.com/MartinBloedorn/ReaThings/raw/${COMMIT}/BopPadMapper/BopPadMapper_Dependencies/memory.jsfx-inc</source>
-# </version>
-# ${NEWVERSIONPLACEHOLDER}"`
-
+# printf ain't an option, as sed gets confused with line endings
 NEWVERSION=`echo "<version name=\"${VERSION}\" author=\"Martin Bloedorn\" time=\"${DATE}\">\n"`
 NEWVERSION+=`echo "<changelog><![CDATA[${INFO}]]></changelog>\n"`
 NEWVERSION+=`echo "<source>https://github.com/MartinBloedorn/ReaThings/raw/${COMMIT}/JSFX/BopPadMapper/BopPadMapper.jsfx</source>\n"`
